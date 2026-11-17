@@ -91,6 +91,15 @@ function tokenMatches(given, expected) {
   return crypto.timingSafeEqual(left, right);
 }
 
+function readAppVersion() {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+    return String(pkg.version || '');
+  } catch {
+    return '';
+  }
+}
+
 function serveStatic(req, res, url) {
   let pathname = decodeURIComponent(url.pathname);
   if (pathname === '/') pathname = '/index.html';
@@ -104,9 +113,13 @@ function serveStatic(req, res, url) {
       sendJson(res, 404, { error: 'Не найдено.' });
       return;
     }
+    let body = data;
+    if (file.endsWith(`${path.sep}index.html`)) {
+      body = Buffer.from(data.toString('utf8').replaceAll('__APP_VERSION__', readAppVersion()));
+    }
     const type = TYPES[path.extname(file)] || 'application/octet-stream';
     res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' });
-    res.end(data);
+    res.end(body);
   });
 }
 
