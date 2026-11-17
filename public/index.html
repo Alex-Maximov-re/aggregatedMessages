@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Сводка — сообщения Авито</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2312140f'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23dff56a'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">Авито · мессенджер</p>
+          <h1>Сводка</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <p id="status" class="status" role="status"><span class="dot"></span><span>Нет ключей</span></p>
+        <button id="settings-button" class="ghost" type="button" hidden>Настройки</button>
+        <button id="enable-notifications" class="ghost" type="button">Уведомления браузера</button>
+        <button id="test-notification" class="ghost" type="button">Проверить</button>
+      </div>
+    </header>
+    <p id="error" class="error" role="alert" hidden></p>
+    <main id="workspace" class="workspace" data-mode="setup">
+      <section class="panel setup" id="setup-panel">
+        <header class="panel-head">
+          <h2>Подключение</h2>
+          <button id="back-button" class="ghost" type="button" hidden>К чатам</button>
+        </header>
+        <form id="setup-form" class="setup-form">
+          <ol class="steps">
+            <li>В кабинете Авито откройте «Для профессионалов» → API и создайте ключ. Пароль от входа на Авито сюда не нужен.</li>
+            <li>В доступах отметьте чтение сообщений (<code>messenger:read</code>) и информацию о пользователе (<code>user:read</code>).</li>
+            <li>Мессенджер по API открыт на платном тарифе: «Базовый», «Расширенный» или «Максимальный».</li>
+          </ol>
+          <p class="fine">Документация: <a href="https://developers.avito.ru/" target="_blank" rel="noopener">developers.avito.ru</a></p>
+          <label>
+            Client ID
+            <input id="client-id" name="clientId" autocomplete="off" spellcheck="false" required />
+          </label>
+          <label>
+            Client Secret
+            <input id="client-secret" name="clientSecret" type="password" autocomplete="off" />
+          </label>
+          <div class="split">
+            <label>
+              Проверять каждые, сек
+              <input id="poll-seconds" name="pollSeconds" type="number" min="15" max="300" value="30" />
+            </label>
+            <label class="check">
+              <input id="notify-existing" type="checkbox" />
+              <span>При первой проверке сообщить о уже непрочитанных</span>
+            </label>
+          </div>
+          <div class="row">
+            <button id="connect-button" type="submit">Подключить</button>
+            <button id="stop-button" class="ghost" type="button">Остановить</button>
+            <button id="forget-button" class="danger" type="button">Удалить ключи</button>
+          </div>
+          <p class="fine">Ключи лежат только в <code>data/state.json</code> на этом компьютере и уходят лишь на <code>api.avito.ru</code>.</p>
+          <fieldset>
+            <legend>Пока страница открыта</legend>
+            <p class="fine">Сводка сама спрашивает Авито. Браузерное уведомление придёт, если вкладка жива и доступ разрешён. Чат в Авито при этом не помечается прочитанным.</p>
+          </fieldset>
+          <fieldset>
+            <legend>Если нужен сигнал при закрытой вкладке</legend>
+            <p class="fine">Авито умеет присылать вебхук, но только на публичный https-адрес. Поднимите туннель на этот сервер и вставьте его адрес, например <code>https://xxxx.trycloudflare.com</code>.</p>
+            <label>
+              Публичный адрес
+              <input id="webhook-url" name="publicWebhookUrl" placeholder="https://example.com" spellcheck="false" />
+            </label>
+            <p id="webhook-preview" class="fine"></p>
+            <div class="row">
+              <button id="webhook-register" class="ghost" type="button">Подписать Авито</button>
+              <button id="webhook-unsubscribe" class="ghost" type="button">Отписать</button>
+            </div>
+          </fieldset>
+        </form>
+      </section>
+      <section class="panel chats" id="chats-panel">
+        <header class="panel-head">
+          <h2>Чаты <span id="unread-count" class="count" hidden>0</span></h2>
+          <button id="poll-now" class="ghost" type="button">Проверить сейчас</button>
+        </header>
+        <div id="chat-list" class="scroll"></div>
+      </section>
+      <section class="panel thread" id="thread-panel">
+        <header class="panel-head">
+          <div>
+            <h2 id="thread-title">Переписка</h2>
+            <p id="thread-sub" class="fine"></p>
+          </div>
+          <a id="thread-link" class="ghost linkish" href="" target="_blank" rel="noopener" hidden>Объявление</a>
+        </header>
+        <div id="thread" class="scroll thread-body"></div>
+      </section>
+      <section class="panel journal" id="journal-panel">
+        <header class="panel-head">
+          <h2>Новые</h2>
+          <button id="unread-now" class="ghost" type="button">Уже в чатах</button>
+          <button id="dismiss-all" class="ghost" type="button">Очистить</button>
+        </header>
+        <div id="journal" class="scroll"></div>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "aggregated-messages",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Локальная сводка новых сообщений Авито",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
