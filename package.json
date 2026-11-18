@@ -1,14 +1,23 @@
 {
   "name": "aggregated-messages",
-  "version": "1.00.01",
+  "version": "1.00.02",
   "private": true,
   "type": "module",
   "description": "Локальная сводка новых сообщений Авито",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "wrangler": "^4.50.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261117.1": true
   }
 }

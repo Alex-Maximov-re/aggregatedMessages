@@ -26,6 +26,9 @@ let selectedChatId = '';
 let showSettings = false;
 let threadRequest = 0;
 let audioCtx = null;
+let locked = false;
+let events = null;
+let pullTimer = 0;
 
 function formatTime(ms) {
   if (!ms) return '';
@@ -364,18 +367,75 @@ document.querySelector('#webhook-register').addEventListener('click', async () =
 });
 document.querySelector('#webhook-unsubscribe').addEventListener('click', () => post('/api/webhook/unsubscribe').catch(showFailure));
 
+function showLock(on) {
+  locked = on;
+  document.querySelector('#lock-panel').hidden = !on;
+  workspace.hidden = on;
+}
+
+async function pullState() {
+  try {
+    const response = await fetch(apiUrl('/api/state'), { cache: 'no-store' });
+    if (response.status === 401) {
+      const data = await response.json().catch(() => ({}));
+      if (data.locked) {
+        showLock(true);
+        return 'locked';
+      }
+    }
+    if (response.status === 404) return 'missing';
+    if (!response.ok) return 'error';
+    showLock(false);
+    applyState(await response.json());
+    startEvents();
+    return 'ok';
+  } catch {
+    if (!latest && !locked) {
+      errorNode.hidden = false;
+      errorNode.textContent = 'Нет связи с сервером сводки.';
+    }
+    return 'error';
+  }
+}
+
+function startEvents() {
+  if (events) return;
+  events = new EventSource(apiUrl('/api/events'));
+  events.addEventListener('state', (event) => {
+    applyState(JSON.parse(event.data));
+  });
+  events.onerror = () => {
+    if (!latest && !locked) {
+      errorNode.hidden = false;
+      errorNode.textContent = 'Нет связи с сервером сводки.';
+    }
+  };
+}
+
 function showFailure(error) {
   errorNode.hidden = false;
   errorNode.textContent = error.message || 'Ошибка';
 }
 
-const events = new EventSource(apiUrl('/api/events'));
-events.addEventListener('state', (event) => {
-  applyState(JSON.parse(event.data));
-});
-events.onerror = () => {
-  if (!latest) {
-    errorNode.hidden = false;
-    errorNode.textContent = 'Нет связи с локальным сервером сводки.';
+webhookUrl.placeholder = location.origin;
+
+document.querySelector('#lock-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    await post('/api/login', { password: document.querySelector('#lock-password').value });
+    document.querySelector('#lock-password').value = '';
+    const result = await pullState();
+    if (result === 'ok' && !pullTimer) pullTimer = setInterval(pullState, 4000);
+  } catch (error) {
+    showFailure(error);
   }
-};
+});
+
+pullState().then((result) => {
+  if (result === 'ok') pullTimer = setInterval(pullState, 4000);
+  if (result === 'missing' && !latest) {
+    errorNode.hidden = false;
+    errorNode.textContent = 'Сервер сводки на этом адресе не отвечает.';
+  }
+});
+

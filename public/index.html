@@ -25,6 +25,17 @@
       </div>
     </header>
     <p id="error" class="error" role="alert" hidden></p>
+    <section id="lock-panel" class="lock" hidden>
+      <form id="lock-form" class="panel setup-form">
+        <h2>Доступ</h2>
+        <p class="fine">Этот адрес открыт в интернет. Введите пароль приложения, чтобы открыть сводку и ключи Авито.</p>
+        <label>
+          Пароль
+          <input id="lock-password" type="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">Войти</button>
+      </form>
+    </section>
     <main id="workspace" class="workspace" data-mode="setup">
       <section class="panel setup" id="setup-panel">
         <header class="panel-head">
@@ -61,7 +72,7 @@
             <button id="stop-button" class="ghost" type="button">Остановить</button>
             <button id="forget-button" class="danger" type="button">Удалить ключи</button>
           </div>
-          <p class="fine">Ключи лежат только в <code>data/state.json</code> на этом компьютере и уходят лишь на <code>api.avito.ru</code>.</p>
+          <p class="fine">Ключи хранятся там, где запущена сводка: в <code>data/state.json</code> на этом компьютере или в Cloudflare для облачной версии. Дальше они уходят только на <code>api.avito.ru</code>.</p>
           <fieldset>
             <legend>Пока страница открыта</legend>
             <p class="fine">Сводка сама спрашивает Авито. Браузерное уведомление придёт, если вкладка жива и доступ разрешён. Чат в Авито при этом не помечается прочитанным.</p>
