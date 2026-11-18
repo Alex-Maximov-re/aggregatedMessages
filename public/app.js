@@ -79,8 +79,14 @@ function setBusy(busy) {
   connectButton.textContent = busy ? 'Подключаю…' : 'Подключить';
 }
 
+function apiUrl(path) {
+  const page = new URL(window.location.href);
+  if (!page.pathname.endsWith('/')) page.pathname = page.pathname.replace(/[^/]*$/, '');
+  return new URL(String(path).replace(/^\//, ''), page).href;
+}
+
 async function post(url, body) {
-  const response = await fetch(url, {
+  const response = await fetch(apiUrl(url), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body || {}),
@@ -269,7 +275,7 @@ async function selectChat(chatId) {
   pending.textContent = 'Загружаю сообщения…';
   thread.append(pending);
   try {
-    const response = await fetch(`/api/messages?chatId=${encodeURIComponent(chatId)}`);
+    const response = await fetch(apiUrl(`/api/messages?chatId=${encodeURIComponent(chatId)}`));
     const data = await response.json();
     if (request !== threadRequest) return;
     if (!response.ok) throw new Error(data.error || 'Не удалось открыть переписку.');
@@ -363,7 +369,7 @@ function showFailure(error) {
   errorNode.textContent = error.message || 'Ошибка';
 }
 
-const events = new EventSource('/api/events');
+const events = new EventSource(apiUrl('/api/events'));
 events.addEventListener('state', (event) => {
   applyState(JSON.parse(event.data));
 });
